@@ -305,7 +305,8 @@ double size_in_mega_bytes(const T& t);
 
 struct nullstream : std::ostream {
     struct nullbuf: std::streambuf {
-        int overflow(int c) {
+        int overflow(int c)
+        {
             return traits_type::not_eof(c);
         }
         int xputc(int) { return 0; }
@@ -357,6 +358,7 @@ void load_vector(std::vector<T>& vec, std::istream& in)
     }
 }
 
+
 template<format_type F, typename X>
 void write_structure(const X& x, std::ostream& out)
 {
@@ -368,6 +370,13 @@ void write_structure(const X& x, std::ostream& out)
             sdsl::write_structure_tree<F>(child.second.get(), out);
         }
     }
+}
+
+template<format_type F, typename X>
+void write_structure(const X& x, std::string file)
+{
+    std::ofstream out(file);
+    write_structure<F>(x, out);
 }
 
 template<format_type F, typename... Xs>
@@ -398,14 +407,14 @@ template<class t_csa>
 const t_csa& _idx_csa(const t_csa& t, csa_tag)
 {
     return t;
-};
+}
 
 //! Internal function used by csXprintf
 template<class t_cst>
 const typename t_cst::csa_type& _idx_csa(const t_cst& t, cst_tag)
 {
     return t.csa;
-};
+}
 
 //! Internal function used by csXprintf
 template<class t_csa>
@@ -790,6 +799,17 @@ operator<<(std::ostream& os, const std::vector<t_int>& v)
     for (auto it=v.begin(), end = v.end(); it != end; ++it) {
         os << *it;
         if (it+1 != end) os << " ";
+    }
+    return os;
+}
+
+template<class t_iv>
+inline typename std::enable_if<std::is_same<typename t_iv::category ,csa_member_tag>::value, std::ostream&>::type
+operator<<(std::ostream& os, const t_iv& v)
+{
+    for (auto it=v.begin(), end = v.end(); it != end; ++it) {
+        os << *it;
+        if (it+1 != end and std::is_same<typename t_iv::alphabet_category,int_alphabet_tag>::value) os << " ";
     }
     return os;
 }

@@ -50,7 +50,7 @@ namespace sdsl
 struct bits {
     bits() = delete;
     //! 64bit mask with all bits set to 1.
-    constexpr static int64_t  all_set {-1LL};
+    constexpr static uint64_t  all_set {-1ULL};
 
     //! This constant represents a de Bruijn sequence B(k,n) for k=2 and n=6.
     /*! Details for de Bruijn sequences see
@@ -104,7 +104,7 @@ struct bits {
 
     //! Position of the most significant set bit the 64-bit word x
     /*! \param x 64-bit word
-        \return The position (in 0..63) of the least significant set bit
+        \return The position (in 0..63) of the most significant set bit
                 in `x` or 0 if x equals 0.
     	\sa sel, lo
     */
@@ -157,7 +157,7 @@ struct bits {
     //! Map all 10 bit pairs to 01 or 1 if c=1 and the lsb=0. All other pairs are mapped to 00.
     static uint64_t map10(uint64_t x, uint64_t c=0);
 
-    //! Map all 01 bit pairs to 01 of 1 if c=1 and the lsb=0. All other pairs are mapped to 00.
+    //! Map all 01 bit pairs to 01 or 1 if c=1 and the lsb=0. All other pairs are mapped to 00.
     static uint64_t map01(uint64_t x, uint64_t c=1);
 
     //! Calculate the position of the i-th rightmost 1 bit in the 64bit integer x

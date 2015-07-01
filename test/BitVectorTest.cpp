@@ -34,7 +34,8 @@ rrr_vector<83>,
 rrr_vector<127>,
 rrr_vector<128>,
 sd_vector<>,
-sd_vector<rrr_vector<63> >
+sd_vector<rrr_vector<63> >,
+hyb_vector<>
 > Implementations;
 
 
@@ -105,6 +106,25 @@ TYPED_TEST(BitVectorTest, Swap)
     ASSERT_EQ(bv.size(), bv_empty.size());
     for (uint64_t j=0; j < bv.size(); ++j) {
         ASSERT_EQ((bool)(bv[j]), (bool)(bv_empty[j]));
+    }
+}
+
+TEST(SD_VECTOR, IteratorConstructor)
+{
+    std::vector<uint64_t> pos;
+    bit_vector bv(100000);
+    std::mt19937_64 rng;
+    std::uniform_int_distribution<uint64_t> distribution(0, 9);
+    auto dice = bind(distribution, rng);
+    for (size_t i=0; i < bv.size(); ++i) {
+        if (0 == dice()) {
+            pos.emplace_back(i);
+            bv[i] = 1;
+        }
+    }
+    sd_vector<> sdv(pos.begin(),pos.end());
+    for (size_t i=0; i < bv.size(); ++i) {
+        ASSERT_EQ((bool)sdv[i],(bool)bv[i]);
     }
 }
 

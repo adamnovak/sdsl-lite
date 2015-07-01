@@ -37,7 +37,7 @@ namespace sdsl
  *    \f$ \Order{\log \sigma} \f$
  *  TODO: add hinted binary search? Two way binary search?
 */
-template <class t_csa>
+template <typename t_csa>
 typename t_csa::char_type first_row_symbol(const typename t_csa::size_type i, const t_csa& csa)
 {
     assert(i < csa.size());
@@ -64,21 +64,23 @@ typename t_csa::char_type first_row_symbol(const typename t_csa::size_type i, co
 }
 
 // psi[] trait
-template<class t_csa, bool t_direction>
+template<typename t_csa, bool t_direction>
 struct traverse_csa_psi_trait {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         return csa.psi[i];
     }
 };
 
 // lf[] trait
-template<class t_csa>
+template<typename t_csa>
 struct traverse_csa_psi_trait<t_csa,false> {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         // TODO: in case of a very sparse sampling of SA it may be faster to
         //  use \sigma binary searches on PSI function to determine the
         // LF values.
@@ -86,7 +88,7 @@ struct traverse_csa_psi_trait<t_csa,false> {
     }
 };
 
-template<class t_csa,bool t_direction>
+template<typename t_csa,bool t_direction>
 class traverse_csa_psi
 {
     public:
@@ -94,6 +96,8 @@ class traverse_csa_psi
         typedef typename t_csa::size_type                             size_type;
         typedef typename t_csa::difference_type                 difference_type;
         typedef random_access_const_iterator<traverse_csa_psi>   const_iterator;
+        typedef csa_member_tag                                         category;
+        typedef int_alphabet_tag                              alphabet_category;                    
 
     private:
         const t_csa& m_csa;
@@ -106,22 +110,26 @@ class traverse_csa_psi
         //! Calculate the \f$\Psi\f$ or \f$\LF\f$ value at position i.
         /*! \param i The index for which the \f$\Psi\f$ or \f$\LF\f$ value should be calculated, \f$i\in [0..size()-1]\f$.
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
             return traverse_csa_psi_trait<t_csa,t_direction>::access(m_csa,i);
         }
 
         //! Returns the size of the \f$\Psi\f$ function.
-        size_type size() const {
+        size_type size() const
+        {
             return m_csa.size();
         }
 
         //! Returns if the \f$\Psi\f$ function is empty.
-        size_type empty() const {
+        size_type empty() const
+        {
             return m_csa.empty();
         }
 
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
 
@@ -129,28 +137,31 @@ class traverse_csa_psi
         /*! Required for the STL Container Concept.
          *  \sa begin.
          */
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
 // psi[] trait
-template<class t_csa,bool t_direction>
+template<typename t_csa,bool t_direction>
 struct traverse_csa_saisa_trait {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         // \f$\Psi[i] = SA^{-1}[SA[i]+1 \mod n]\f$, where \f$n\f$ is the length of the suffix array SA
         return csa.isa[(csa[i]+1) %  csa.size() ];
     }
 };
 
 // lf[] trait
-template<class t_csa>
+template<typename t_csa>
 struct traverse_csa_saisa_trait<t_csa,false> {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         // TODO: in case of a very sparse sampling of SA it may be faster to
         //  use \sigma binary searches on PSI function to determine the
         // LF values.
@@ -159,7 +170,7 @@ struct traverse_csa_saisa_trait<t_csa,false> {
 };
 
 //! A helper class for the \f$\Psi\f$ function for (compressed) suffix arrays which provide also the inverse suffix array values (like sdsl::csa_bitcompressed).
-template<class t_csa,bool t_direction>
+template<typename t_csa,bool t_direction>
 class traverse_csa_saisa
 {
     public:
@@ -167,6 +178,8 @@ class traverse_csa_saisa
         typedef typename t_csa::size_type size_type;
         typedef typename t_csa::difference_type	difference_type;
         typedef random_access_const_iterator<traverse_csa_saisa> const_iterator;// STL Container requirement
+        typedef csa_member_tag                                         category;
+        typedef int_alphabet_tag                              alphabet_category;
     private:
         const t_csa& m_csa;
     public:
@@ -181,18 +194,21 @@ class traverse_csa_saisa
          *	\par Time complexity
          *		\f$ \Order{\saaccess+\isaaccess} \f$
         */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i<size());
             return traverse_csa_saisa_trait<t_csa,t_direction>::access(m_csa,i);
         }
 
         //! Returns the size of the \f$\Psi\f$ function.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
 
         //! Returns if the \f$\Psi\f$ function is empty.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa,empty();
         }
 
@@ -200,7 +216,8 @@ class traverse_csa_saisa
         /*! Required for the STL Container Concept.
          *  \sa end
          */
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
 
@@ -208,13 +225,14 @@ class traverse_csa_saisa
         /*! Required for the STL Container Concept.
          *  \sa begin.
          */
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
 //! A wrapper for the bwt of a compressed suffix array that is based on the \f$\psi\f$ function.
-template<class t_csa>
+template<typename t_csa>
 class bwt_of_csa_psi
 {
     public:
@@ -223,6 +241,8 @@ class bwt_of_csa_psi
         typedef typename t_csa::char_type char_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<bwt_of_csa_psi> const_iterator;
+        typedef csa_member_tag                               category;
+        typedef typename t_csa::alphabet_category            alphabet_category;
     private:
         const t_csa& m_csa; //<- pointer to the (compressed) suffix array that is based on the \f$\Psi\f$ function.
     public:
@@ -235,7 +255,8 @@ class bwt_of_csa_psi
          *	\par Time complexity
          *		\f$ \Order{\log |\Sigma|} \f$
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
             size_type pos = m_csa.lf[i];
             return first_row_symbol(pos,m_csa);
@@ -249,7 +270,8 @@ class bwt_of_csa_psi
          *  \par Time complexity
          *        \f$ \Order{\log n t_{\Psi}} \f$
          */
-        size_type rank(size_type i, const char_type c)const {
+        size_type rank(size_type i, const char_type c)const
+        {
             return m_csa.rank_bwt(i,c);
         }
 
@@ -261,17 +283,20 @@ class bwt_of_csa_psi
          *  \par Time complexity
          *        \f$ \Order{t_{\Psi}} \f$
          */
-        size_type select(size_type i, const char_type c)const {
+        size_type select(size_type i, const char_type c)const
+        {
             return m_csa.select_bwt(i, c);
         }
 
         //! Returns the size of the \f$\Psi\f$ function.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
 
         //! Returns if the bwt is empty.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa.empty();
         }
 
@@ -279,7 +304,8 @@ class bwt_of_csa_psi
         /*! Required for the STL Container Concept.
          *  \sa end
          */
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
 
@@ -287,30 +313,33 @@ class bwt_of_csa_psi
         /*! Required for the STL Container Concept.
          *  \sa begin.
          */
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
 // psi[] trait
-template<class t_csa,bool t_direction>
+template<typename t_csa,bool t_direction>
 struct traverse_csa_wt_traits {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::char_type char_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         char_type c = csa.F[i];
         return csa.wavelet_tree.select(i - csa.C[csa.char2comp[c]] + 1 , c);
     }
 };
 
 // lf[] trait
-template<class t_csa>
+template<typename t_csa>
 struct traverse_csa_wt_traits<t_csa,false> {
     typedef typename t_csa::value_type value_type;
     typedef typename t_csa::char_type char_type;
     typedef typename t_csa::size_type size_type;
-    static value_type access(const t_csa& csa,size_type i) {
+    static value_type access(const t_csa& csa,size_type i)
+    {
         typename t_csa::char_type c;
         auto rc = csa.wavelet_tree.inverse_select(i);
         size_type j = rc.first;
@@ -321,7 +350,7 @@ struct traverse_csa_wt_traits<t_csa,false> {
 
 
 //! A wrapper class for the \f$\Psi\f$ and LF function for (compressed) suffix arrays that are based on a wavelet tree (like sdsl::csa_wt).
-template<class t_csa,bool t_direction>
+template<typename t_csa,bool t_direction>
 class traverse_csa_wt
 {
     public:
@@ -330,6 +359,8 @@ class traverse_csa_wt
         typedef typename t_csa::char_type char_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<traverse_csa_wt> const_iterator;
+        typedef csa_member_tag                                category;
+        typedef int_alphabet_tag                              alphabet_category;
     private:
         const t_csa& m_csa; //<- pointer to the (compressed) suffix array that is based on a wavelet tree
         traverse_csa_wt() {};    // disable default constructor
@@ -341,30 +372,35 @@ class traverse_csa_wt
          *	\par Time complexity
          *		\f$ \Order{\log |\Sigma|} \f$
          */
-        value_type operator[](size_type i) const {
+        value_type operator[](size_type i) const
+        {
             assert(i < m_csa.size());
             return traverse_csa_wt_traits<t_csa,t_direction>::access(m_csa,i);
         }
 
         //! Returns the size of the \f$\Psi\f$ function.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
         //! Returns if the \f$\Psi\f$ function is empty.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa.empty();
         }
         //! Returns a const_iterator to the first element.
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
         //! Returns a const_iterator to the element after the last element.
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
-template<class t_csa>
+template<typename t_csa>
 class bwt_of_csa_wt
 {
     public:
@@ -373,6 +409,8 @@ class bwt_of_csa_wt
         typedef typename t_csa::char_type char_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<bwt_of_csa_wt> const_iterator;
+        typedef csa_member_tag                              category;
+        typedef typename t_csa::alphabet_category           alphabet_category;
     private:
         const t_csa& m_csa; //<- pointer to the (compressed) suffix array that is based on a wavelet tree
         bwt_of_csa_wt() {};    // disable default constructor
@@ -384,12 +422,14 @@ class bwt_of_csa_wt
          *	\par Time complexity
          *		\f$ \Order{\log |\Sigma|} \f$
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
             return m_csa.wavelet_tree[i];
         }
         //! Returns the size of the BWT function.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
 
@@ -401,7 +441,8 @@ class bwt_of_csa_wt
          *  \par Time complexity
          *        \f$ \Order{\log |\Sigma|} \f$
          */
-        size_type rank(size_type i, const char_type c)const {
+        size_type rank(size_type i, const char_type c)const
+        {
             return m_csa.rank_bwt(i, c);
         }
 
@@ -413,26 +454,30 @@ class bwt_of_csa_wt
          *  \par Time complexity
          *        \f$ \Order{t_{\Psi}} \f$
          */
-        size_type select(size_type i, const char_type c)const {
+        size_type select(size_type i, const char_type c)const
+        {
             return m_csa.select(i, c);
         }
 
 
         //! Returns if the BWT function is empty.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa.empty();
         }
         //! Returns a const_iterator to the first element.
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
         //! Returns a const_iterator to the element after the last element.
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
-template<class t_csa>
+template<typename t_csa>
 class isa_of_csa_wt
 {
     public:
@@ -440,52 +485,57 @@ class isa_of_csa_wt
         typedef typename t_csa::size_type size_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<isa_of_csa_wt> const_iterator;
+        typedef csa_member_tag                              category;
+        typedef int_alphabet_tag                            alphabet_category;
     private:
         const t_csa& m_csa; //<- pointer to the (compressed) suffix array that is based on a wavelet tree
         isa_of_csa_wt() {};    // disable default constructor
     public:
         //! Constructor
         isa_of_csa_wt(const t_csa& csa_wt) : m_csa(csa_wt) {}
-        //! Calculate the Burrows Wheeler Transform (BWT) at position i.
-        /*! \param i The index for which the \f$\Psi\f$ value should be calculated, \f$i\in [0..size()-1]\f$.
-         *  \par Time complexity
-         *      \f$ \Order{\log |\Sigma|} \f$
+
+        //! Access operator to ISA.
+        /*! \param i Index \f$i\in [0..size()-1]\f$.
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
-            size_type ii;
-            // get the leftmost sampled isa value to the right of i
-            value_type result = m_csa.isa_sample[ ii = ((i+m_csa.isa_sample_dens-1)/m_csa.isa_sample_dens) ];
-            ii *= m_csa.isa_sample_dens;
-            if (ii >= m_csa.size()) {
-                i = m_csa.size() - 1 - i;
+            auto sample = m_csa.isa_sample.sample_qeq(i);
+            value_type result = std::get<0>(sample);
+            if (std::get<1>(sample) < i) {
+                i = std::get<1>(sample) + m_csa.size() - i;
             } else {
-                i = ii - i;
+                i = std::get<1>(sample) - i;
             }
             while (i--) {
                 result = m_csa.lf[result];
             }
             return result;
         }
-        //! Returns the size of the BWT function.
-        size_type size()const {
+
+        //! Returns the size of the CSA.
+        size_type size()const
+        {
             return m_csa.size();
         }
-        //! Returns if the BWT function is empty.
-        size_type empty()const {
+        //! Returns if the CSA is empty.
+        size_type empty()const
+        {
             return m_csa.empty();
         }
         //! Returns a const_iterator to the first element.
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
         //! Returns a const_iterator to the element after the last element.
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
-template<class t_csa>
+template<typename t_csa>
 class isa_of_csa_psi
 {
     public:
@@ -493,46 +543,53 @@ class isa_of_csa_psi
         typedef typename t_csa::size_type size_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<isa_of_csa_psi> const_iterator;
+        typedef csa_member_tag                               category;
+        typedef int_alphabet_tag                             alphabet_category;
     private:
         const t_csa& m_csa; //<- pointer to the (compressed) suffix array that is based on a wavelet tree
         isa_of_csa_psi() {};    // disable default constructor
     public:
         //! Constructor
         isa_of_csa_psi(const t_csa& csa_wt) : m_csa(csa_wt) {}
-        //! Calculate the Burrows Wheeler Transform (BWT) at position i.
-        /*! \param i The index for which the \f$\Psi\f$ value should be calculated, \f$i\in [0..size()-1]\f$.
-         *  \par Time complexity
-         *      \f$ \Order{\log |\Sigma|} \f$
+
+        //! Access operator to ISA.
+        /*! \param i Index \f$i\in [0..size()-1]\f$.
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
-            // get the rightmost sampled isa value
-            value_type result = m_csa.isa_sample[i/m_csa.isa_sample_dens];
-            i = i % m_csa.isa_sample_dens;
+            // get the rightmost sampled isa value to the left of i
+            auto sample = m_csa.isa_sample.sample_leq(i);
+            value_type result = std::get<0>(sample);
+            i = i - std::get<1>(sample);
             while (i--) {
                 result = m_csa.psi[result];
             }
             return result;
         }
-        //! Returns the size of the BWT function.
-        size_type size()const {
+        //! Returns the size of the CSA.
+        size_type size()const
+        {
             return m_csa.size();
         }
-        //! Returns if the BWT function is empty.
-        size_type empty()const {
+        //! Returns if the CSA is empty.
+        size_type empty()const
+        {
             return m_csa.empty();
         }
         //! Returns a const_iterator to the first element.
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
         //! Returns a const_iterator to the element after the last element.
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
-template<class t_csa>
+template<typename t_csa>
 class first_row_of_csa
 {
     public:
@@ -540,6 +597,8 @@ class first_row_of_csa
         typedef typename t_csa::size_type size_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<first_row_of_csa> const_iterator;
+        typedef csa_member_tag                                 category;
+        typedef typename t_csa::alphabet_category              alphabet_category;
     private:
         const t_csa& m_csa;
     public:
@@ -550,30 +609,35 @@ class first_row_of_csa
          *  \par Time complexity
          *      \f$ \Order{\log |\Sigma|} \f$
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
             return first_row_symbol(i,m_csa);
         }
         //! Returns the size of the F column.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
         //! Returns if the F column is empty.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa.empty();
         }
         //! Returns a const_iterator to the first element.
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
         //! Returns a const_iterator to the element after the last element.
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
 
 
-template<class t_csa>
+template<typename t_csa>
 class text_of_csa
 {
     public:
@@ -581,6 +645,8 @@ class text_of_csa
         typedef typename t_csa::size_type size_type;
         typedef typename t_csa::difference_type difference_type;
         typedef random_access_const_iterator<text_of_csa> const_iterator;
+        typedef csa_member_tag                            category;
+        typedef typename t_csa::alphabet_category         alphabet_category;
     private:
         const t_csa& m_csa;
         text_of_csa() {}
@@ -594,18 +660,21 @@ class text_of_csa
          *	\par Time complexity
          *		\f$ t_{ISA} \log\sigma \f$
          */
-        value_type operator[](size_type i)const {
+        value_type operator[](size_type i)const
+        {
             assert(i < size());
             return first_row_symbol(m_csa.isa[i],m_csa);
         }
 
         //! Returns the size of the original text.
-        size_type size()const {
+        size_type size()const
+        {
             return m_csa.size();
         }
 
         //! Returns if text text has size 0.
-        size_type empty()const {
+        size_type empty()const
+        {
             return m_csa.empty();
         }
 
@@ -613,7 +682,8 @@ class text_of_csa
         /*! Required for the STL Container Concept.
          *  \sa end
          */
-        const_iterator begin()const {
+        const_iterator begin()const
+        {
             return const_iterator(this, 0);
         }
 
@@ -621,32 +691,11 @@ class text_of_csa
         /*! Required for the STL Container Concept.
          *  \sa begin.
          */
-        const_iterator end()const {
+        const_iterator end()const
+        {
             return const_iterator(this, size());
         }
 };
-
-template<class t_csa, uint8_t int_width>
-void set_isa_samples(int_vector_buffer<int_width>& sa_buf, typename t_csa::isa_sample_type& isa_sample)
-{
-    typedef typename t_csa::size_type size_type;
-    auto n = sa_buf.size();
-    isa_sample.width(bits::hi(n)+1);
-    if (n >= 1) { // so n+t_csa::isa_sample_dens >= 2
-        isa_sample.resize((n-1+t_csa::isa_sample_dens-1)/t_csa::isa_sample_dens + 1);
-    }
-    util::set_to_value(isa_sample, 0);
-
-    for (size_type i=0; i < n; ++i) {
-        size_type sa = sa_buf[i];
-        if ((sa % t_csa::isa_sample_dens) == 0) {
-            isa_sample[sa/t_csa::isa_sample_dens] = i;
-        } else if (sa+1 == n) {
-            isa_sample[(sa+t_csa::isa_sample_dens-1)/t_csa::isa_sample_dens] = i;
-        }
-    }
-}
-
 
 }
 

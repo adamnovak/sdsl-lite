@@ -30,11 +30,16 @@ csa_wt<>,
        csa_sada<enc_vector<coder::fibonacci>>,
        csa_sada<enc_vector<coder::elias_gamma>>,
        csa_wt<wt_huff<>, 8, 16, text_order_sa_sampling<>>,
+       csa_wt<wt_huff<>,32,32,fuzzy_sa_sampling<>>,
+       csa_wt<wt_huff<>,32,32,fuzzy_sa_sampling<bit_vector, bit_vector>, fuzzy_isa_sampling_support<>>,
+       csa_wt<wt_huff<>,32,32,fuzzy_sa_sampling<>, fuzzy_isa_sampling_support<>>,
+       csa_wt<wt_huff<>,32,32,text_order_sa_sampling<>,isa_sampling<>>,
+       csa_wt<wt_huff<>,32,32,text_order_sa_sampling<>,text_order_isa_sampling_support<>>,
+       csa_sada<enc_vector<>, 32,32,text_order_sa_sampling<>,isa_sampling<>>,
+       csa_sada<enc_vector<>, 32,32,text_order_sa_sampling<>,text_order_isa_sampling_support<>>,
        csa_wt<wt_huff<>, 8, 16, sa_order_sa_sampling<>>,
-       csa_wt<wt_huff<>, 8, 16, sa_order_sa_sampling<>, int_vector<>,
-       succinct_byte_alphabet<bit_vector, rank_support_v<>, select_support_mcl<>>>,
-       csa_wt<wt_huff<>, 8, 16, sa_order_sa_sampling<>, int_vector<>,
-       succinct_byte_alphabet<>>,
+       csa_wt<wt_huff<>, 8, 16, sa_order_sa_sampling<>, isa_sampling<>, succinct_byte_alphabet<bit_vector, rank_support_v<>, select_support_mcl<>>>,
+       csa_wt<wt_huff<>, 8, 16, sa_order_sa_sampling<>, isa_sampling<>, succinct_byte_alphabet<>>,
        csa_bitcompressed<>
        > Implementations;
 
@@ -48,6 +53,62 @@ TYPED_TEST(CsaByteTest, CreateAndStoreTest)
     construct(csa, test_file, config, 1);
     test_case_file_map = config.file_map;
     ASSERT_TRUE(store_to_file(csa, temp_file));
+}
+
+//! Test backward_search
+TYPED_TEST(CsaByteTest, BackwardSearch)
+{
+    TypeParam csa;
+    ASSERT_TRUE(load_from_file(csa, temp_file));
+    int_vector<8> text;
+    ASSERT_TRUE(load_vector_from_file(text, test_file, 1));
+    auto expected_interval_member = csa.psi[0];
+    size_type count, l_res, r_res;
+    // search for full text
+    count = backward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_EQ((size_type)1, count);
+    ASSERT_EQ(l_res, expected_interval_member);
+    ASSERT_EQ(r_res, expected_interval_member);
+    // search for short phrase
+    text.resize(min((int_vector<8>::size_type)4, text.size()));
+    count = backward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_LE((size_type)1, count);
+    ASSERT_LE(l_res, expected_interval_member);
+    ASSERT_GE(r_res, expected_interval_member);
+    // search for empty phrase
+    text.resize(0);
+    count = backward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_EQ(csa.size(), count);
+    ASSERT_EQ(l_res, (size_type)0);
+    ASSERT_EQ(r_res, (size_type)(csa.size() - 1));
+}
+
+//! Test forward_search
+TYPED_TEST(CsaByteTest, ForwardSearch)
+{
+    TypeParam csa;
+    ASSERT_TRUE(load_from_file(csa, temp_file));
+    int_vector<8> text;
+    ASSERT_TRUE(load_vector_from_file(text, test_file, 1));
+    auto expected_interval_member = csa.psi[0];
+    size_type count, l_res, r_res;
+    // search for full text
+    count = forward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_EQ((size_type)1, count);
+    ASSERT_EQ(l_res, expected_interval_member);
+    ASSERT_EQ(r_res, expected_interval_member);
+    // search for short phrase
+    text.resize(min((int_vector<8>::size_type)4, text.size()));
+    count = forward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_LE((size_type)1, count);
+    ASSERT_LE(l_res, expected_interval_member);
+    ASSERT_GE(r_res, expected_interval_member);
+    // search for empty phrase
+    text.resize(0);
+    count = forward_search(csa, 0, csa.size() - 1, text.begin(), text.end(), l_res, r_res);
+    ASSERT_EQ(csa.size(), count);
+    ASSERT_EQ(l_res, (size_type)0);
+    ASSERT_EQ(r_res, (size_type)(csa.size() - 1));
 }
 
 //! Test sigma member
